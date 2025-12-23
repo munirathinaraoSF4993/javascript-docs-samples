@@ -114,9 +114,10 @@ async function loadScriptsFromHTML(container) {
 function removeScriptsFromHTML(scriptList) {
     if (scriptList && scriptList.length > 0) {
         for (let index = 0; index < scriptList.length; index++) {
-            let targetTag = scriptList[index];
-            if (targetTag && targetTag.parentNode) {
-                targetTag.parentNode.removeChild(targetTag);
+            let selector = `head script[src="${CSS.escape(scriptList[index])}"]`;
+            let targetTag = document.querySelector(selector);
+            if (targetTag && targetTag.parentNode === document.head) {
+                targetTag.remove();
             }
         }
     }
