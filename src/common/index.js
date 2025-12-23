@@ -79,7 +79,27 @@ export async function updataSample(sampleData, isReportViewer) {
     let html = await fetchFile(`src/controls/${dirName}/${sampleData.routerPath}/index.html`);
     let js = await fetchFile(`src/controls/${dirName}/${sampleData.routerPath}/index.js`);
     demo.innerHTML = html;
+    await loadScriptsFromHTML(demo);
     eval(js);
+}
+
+async function loadScriptsFromHTML(container) {
+    debugger
+    let scriptTags = container.querySelectorAll('script');
+    if (scriptTags && scriptTags.length > 0) {
+        for (let index = 0; index < scriptTags.length; index++) {
+            let existingScript = document.head.querySelector(`script[src="${scriptTags[index].src}"]`);
+            if (!existingScript) {
+                let newScript = document.createElement('script');
+                newScript.src = scriptTags[index].src;
+                await new Promise((resolve, reject) => {
+                    newScript.onload = resolve;
+                    newScript.onerror = reject;
+                    document.head.appendChild(newScript);
+                });
+            }
+        }
+    }
 }
 
 function onResize() {
