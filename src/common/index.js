@@ -30,6 +30,7 @@ import {
 let header,sidebar;
 let reportViewer = 'report-viewer';
 let reportDesigner = 'report-designer';
+let lastUpdatedScripts = [];
 
 
 document.addEventListener('DOMContentLoaded', onDOMContentLoaded, false);
@@ -78,13 +79,20 @@ export async function updataSample(sampleData, isReportViewer) {
     let demo = document.getElementsByTagName("ej-sample")[0];
     let html = await fetchFile(`src/controls/${dirName}/${sampleData.routerPath}/index.html`);
     let js = await fetchFile(`src/controls/${dirName}/${sampleData.routerPath}/index.js`);
-    demo.innerHTML = html;
-    await loadScriptsFromHTML(demo);
+    let tags = new DOMParser().parseFromString(html, 'text/html');
+    let container = tags.querySelector('div');
+    demo.innerHTML = container ? container.outerHTML : '';
+    await loadScriptsFromHTML(tags);
     eval(js);
 }
 
 async function loadScriptsFromHTML(container) {
-    debugger
+    if (lastUpdatedScripts && lastUpdatedScripts.length > 0) {
+        removeScriptsFromHTML(lastUpdatedScripts);
+        lastUpdatedScripts = [];
+    }
+
+    if (!container) return;
     let scriptTags = container.querySelectorAll('script');
     if (scriptTags && scriptTags.length > 0) {
         for (let index = 0; index < scriptTags.length; index++) {
@@ -96,7 +104,19 @@ async function loadScriptsFromHTML(container) {
                     newScript.onload = resolve;
                     newScript.onerror = reject;
                     document.head.appendChild(newScript);
+                    lastUpdatedScripts.push(newScript.src);
                 });
+            }
+        }
+    }
+}
+
+function removeScriptsFromHTML(scriptList) {
+    if (scriptList && scriptList.length > 0) {
+        for (let index = 0; index < scriptList.length; index++) {
+            let targetTag = scriptList[index];
+            if (targetTag && targetTag.parentNode) {
+                targetTag.parentNode.removeChild(targetTag);
             }
         }
     }
