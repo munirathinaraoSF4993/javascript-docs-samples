@@ -30,7 +30,7 @@ import {
 let header,sidebar;
 let reportViewer = 'report-viewer';
 let reportDesigner = 'report-designer';
-let lastUpdatedScripts = [];
+let loadedScriptSrcs = new Set();
 
 
 document.addEventListener('DOMContentLoaded', onDOMContentLoaded, false);
@@ -74,53 +74,42 @@ export function updateData(sampleData, isReportViewer) {
     updateMetaData(sampleData);
     setReportsHeight();
 }
+
 export async function updataSample(sampleData, isReportViewer) {
     let dirName = isReportViewer ? reportViewer : reportDesigner;
     let demo = document.getElementsByTagName("ej-sample")[0];
-    let html = await fetchFile(`src/controls/${dirName}/${sampleData.routerPath}/index.html`);
-    let js = await fetchFile(`src/controls/${dirName}/${sampleData.routerPath}/index.js`);
-    let tags = new DOMParser().parseFromString(html, 'text/html');
-    let container = tags.querySelector('div');
-    demo.innerHTML = container ? container.outerHTML : '';
-    await loadScriptsFromHTML(tags);
+    let [html, js] = await Promise.all([
+        fetchFile(`src/controls/${dirName}/${sampleData.routerPath}/index.html`),
+        fetchFile(`src/controls/${dirName}/${sampleData.routerPath}/index.js`)
+    ]);
+    demo.replaceChildren();
+    let doc = document.implementation.createHTMLDocument('');
+    let wrapper = doc.createElement('div');
+    wrapper.innerHTML = html;
+    let nodes = Array.from(wrapper.childNodes);
+    nodes.forEach(node => {
+        if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SCRIPT') return;
+        demo.appendChild(document.importNode(node, true));
+    });
+    let scripts = wrapper.querySelectorAll('script');
+    for (let oldScript of scripts) {
+        let newScript = document.createElement('script');
+        for (let attr of oldScript.attributes) newScript.setAttribute(attr.name, attr.value);
+
+        if (oldScript.src && !loadedScriptSrcs.has(oldScript.src)) {
+            loadedScriptSrcs.add(oldScript.src);
+            await new Promise((resolve, reject) => {
+                newScript.addEventListener('load', resolve, { once: true });
+                newScript.addEventListener('error', reject, { once: true });
+                demo.appendChild(newScript);
+            });
+        } else {
+            if (!newScript.hasAttribute('type')) newScript.type = 'text/javascript';
+            newScript.text = oldScript.textContent || '';
+            demo.appendChild(newScript);
+        }
+    }
     eval(js);
-}
-
-async function loadScriptsFromHTML(container) {
-    if (lastUpdatedScripts && lastUpdatedScripts.length > 0) {
-        removeScriptsFromHTML(lastUpdatedScripts);
-        lastUpdatedScripts = [];
-    }
-
-    if (!container) return;
-    let scriptTags = container.querySelectorAll('script');
-    if (scriptTags && scriptTags.length > 0) {
-        for (let index = 0; index < scriptTags.length; index++) {
-            let existingScript = document.head.querySelector(`script[src="${scriptTags[index].src}"]`);
-            if (!existingScript) {
-                let newScript = document.createElement('script');
-                newScript.src = scriptTags[index].src;
-                await new Promise((resolve, reject) => {
-                    newScript.onload = resolve;
-                    newScript.onerror = reject;
-                    document.head.appendChild(newScript);
-                    lastUpdatedScripts.push(newScript.src);
-                });
-            }
-        }
-    }
-}
-
-function removeScriptsFromHTML(scriptList) {
-    if (scriptList && scriptList.length > 0) {
-        for (let index = 0; index < scriptList.length; index++) {
-            let selector = `head script[src="${CSS.escape(scriptList[index])}"]`;
-            let targetTag = document.querySelector(selector);
-            if (targetTag && targetTag.parentNode === document.head) {
-                targetTag.remove();
-            }
-        }
-    }
 }
 
 function onResize() {

@@ -17,13 +17,13 @@ $(function () {
     $(window).bind('beforeunload', $.proxy(windowUnload, this));
     var dataValue = "";
     var apiRequest = new Object({
-        password: "demo",
-        userid: "guest@boldreports.com"
+        password: "HdEW_Y9EC[$bCtg",
+        userid: "demo@boldreports.com"
         });
 
     $.ajax({
         type: "POST",
-        url: "https://on-premise-demo.boldreports.com/reporting/api/site/site1/get-user-key",
+        url: "https://adhoc.boldreports.com/reporting/api/site/site1/get-user-key",
         data: apiRequest,
         success: function (data) {
             dataValue = data.Token;
@@ -31,7 +31,8 @@ $(function () {
 
             $("#designer").boldReportDesigner(
                 {
-                    serviceUrl: "https://on-premise-demo.boldreports.com/reporting/reportservice/api/Designer",
+                    serviceUrl: "https://adhoc.boldreports.com/reporting/reportservice/api/Designer",
+                    reportServerUrl: "https://adhoc.boldreports.com/reporting/api/site/site1",
                     serviceAuthorizationToken: token.token_type + " " + token.access_token,
                     ajaxBeforeLoad: "onAjaxRequest"
                 });
@@ -41,6 +42,6 @@ $(function () {
 
 function onAjaxRequest(args) {
     args.headers.push({
-        Key: 'serverurl', Value: 'https://on-premise-demo.boldreports.com/reporting/api/site/site1'
+        Key: 'serverurl', Value: 'https://adhoc.boldreports.com/reporting/api/site/site1'
     });
 }
