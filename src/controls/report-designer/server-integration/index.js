@@ -13,17 +13,15 @@ function windowUnload(args) {
 }
 
 $(function () {
+    renderMessage();
     $(document.body).bind('submit', $.proxy(formSubmit, this));
     $(window).bind('beforeunload', $.proxy(windowUnload, this));
     var dataValue = "";
-    var apiRequest = new Object({
-        password: "",
-        userid: "demo@boldreports.com"
-        });
+    var apiRequest = new Object({ password: "", userid: "" });
 
     $.ajax({
         type: "POST",
-        url: "https://adhoc.boldreports.com/reporting/api/site/site1/get-user-key",
+        url: "https://{your-report-server-domain}/reporting/api/site/site1/get-user-key",
         data: apiRequest,
         success: function (data) {
             dataValue = data.Token;
@@ -31,8 +29,8 @@ $(function () {
 
             $("#designer").boldReportDesigner(
                 {
-                    serviceUrl: "https://adhoc.boldreports.com/reporting/reportservice/api/Designer",
-                    reportServerUrl: "https://adhoc.boldreports.com/reporting/api/site/site1",
+                    serviceUrl: "https://{your-report-server-domain}/reporting/reportservice/api/Designer",
+                    reportServerUrl: "https://{your-report-server-domain}/reporting/api/site/site1",
                     serviceAuthorizationToken: token.token_type + " " + token.access_token,
                     ajaxBeforeLoad: "onAjaxRequest"
                 });
@@ -40,8 +38,27 @@ $(function () {
     });
 });
 
+function renderMessage() {
+    let demo = document.getElementsByTagName("ej-sample")[0];
+    let toastObj = new ejs.notifications.Toast({
+        cssClass: 'e-toast-info',
+        timeOut: 10000,
+        width: '320px',
+        target: document.body,
+        position: { X: 'Right', Y: 'Top' },
+        content: 'To run this sample, configure your on-premises server URL and service URL, and provide valid user credentials.',
+        animation: {
+            hide: { effect: 'SlideRightOut' },
+            show: { effect: 'SlideRightIn' }
+        }
+
+    });
+    toastObj.appendTo(demo);
+    toastObj.show();
+}
+
 function onAjaxRequest(args) {
     args.headers.push({
-        Key: 'serverurl', Value: 'https://adhoc.boldreports.com/reporting/api/site/site1'
+        Key: 'serverurl', Value: 'https://{your-report-server-domain}/reporting/api/site/site1'
     });
 }
