@@ -17,7 +17,7 @@ $(function () {
     $(window).bind('beforeunload', $.proxy(windowUnload, this));
     var dataValue = "";
     var apiRequest = new Object({
-        password: "HdEW_Y9EC[$bCtg",
+        password: "",
         userid: "demo@boldreports.com"
         });
 
