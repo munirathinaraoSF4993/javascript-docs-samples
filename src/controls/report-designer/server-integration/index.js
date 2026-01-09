@@ -51,7 +51,6 @@ function renderMessage() {
             hide: { effect: 'SlideRightOut' },
             show: { effect: 'SlideRightIn' }
         }
-
     });
     toastObj.appendTo(demo);
     toastObj.show();
