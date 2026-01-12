@@ -40,20 +40,17 @@ $(function () {
 
 function renderMessage() {
     let demo = document.getElementsByTagName("ej-sample")[0];
-    let toastObj = new ejs.notifications.Toast({
-        cssClass: 'e-toast-info',
-        timeOut: 10000,
-        width: '320px',
-        target: document.body,
-        position: { X: 'Right', Y: 'Top' },
-        content: 'To run this sample, configure your on-premises server URL and service URL, and provide valid user credentials.',
-        animation: {
-            hide: { effect: 'SlideRightOut' },
-            show: { effect: 'SlideRightIn' }
-        }
-    });
-    toastObj.appendTo(demo);
-    toastObj.show();
+    let container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.alignItems = 'center';
+    container.style.justifyContent = 'center';
+    container.style.height = '100%';
+
+    let textNode = document.createElement('span');
+    textNode.textContent = 'To run this sample, configure your on-premises server URL and valid user credentials.';
+    textNode.style.zIndex = '9999';
+    container.append(textNode);
+    demo.append(container);
 }
 
 function onAjaxRequest(args) {
