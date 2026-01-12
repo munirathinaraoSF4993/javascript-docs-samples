@@ -41,14 +41,13 @@ $(function () {
 function renderMessage() {
     let demo = document.getElementsByTagName("ej-sample")[0];
     let container = document.createElement('div');
+    container.style.height = '100%';
     container.style.display = 'flex';
     container.style.alignItems = 'center';
     container.style.justifyContent = 'center';
-    container.style.height = '100%';
 
     let textNode = document.createElement('span');
     textNode.textContent = 'To run this sample, configure your on-premises server URL and valid user credentials.';
-    textNode.style.zIndex = '9999';
     container.append(textNode);
     demo.append(container);
 }
