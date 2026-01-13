@@ -109,7 +109,18 @@ export async function updataSample(sampleData, isReportViewer) {
             demo.appendChild(newScript);
         }
     }
+    renderErrorMsg(demo);
     eval(js);
+}
+
+function renderErrorMsg(demo) {
+    let errorMsg = document.createElement('div');
+    errorMsg.style.display = 'none';
+    errorMsg.id = 'sample_error_msg';
+    errorMsg.style.height = '100%';
+    errorMsg.style.alignItems = 'center';
+    errorMsg.style.justifyContent = 'center';
+    demo.append(errorMsg);
 }
 
 function onResize() {

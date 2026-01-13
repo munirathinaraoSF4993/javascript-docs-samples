@@ -1,4 +1,5 @@
 var isSubmit = true;
+var reportServerUrl = '';
 
 function formSubmit(args) {
     isSubmit = false;
@@ -13,47 +14,52 @@ function windowUnload(args) {
 }
 
 $(function () {
-    renderMessage();
     $(document.body).bind('submit', $.proxy(formSubmit, this));
     $(window).bind('beforeunload', $.proxy(windowUnload, this));
     var dataValue = "";
     var apiRequest = new Object({ password: "", userid: "" });
 
-    $.ajax({
-        type: "POST",
-        url: "https://{your-report-server-domain}/reporting/api/site/site1/get-user-key",
-        data: apiRequest,
-        success: function (data) {
-            dataValue = data.Token;
-            var token = JSON.parse(dataValue);
+    if (reportServerUrl !== '' && reportServerUrl.length > 0) {
+        $.ajax({
+            type: "POST",
+            url: "https://" + reportServerUrl + "/reporting/api/site/site1/get-user-key",
+            data: apiRequest,
+            success: function (data) {
+                dataValue = data.Token;
+                var token = data && data.Token ? JSON.parse(dataValue) : null;
+                if (!token || !token.token_type || !token.access_token) return renderMessage();
 
-            $("#designer").boldReportDesigner(
-                {
-                    serviceUrl: "https://{your-report-server-domain}/reporting/reportservice/api/Designer",
-                    reportServerUrl: "https://{your-report-server-domain}/reporting/api/site/site1",
-                    serviceAuthorizationToken: token.token_type + " " + token.access_token,
-                    ajaxBeforeLoad: "onAjaxRequest"
-                });
-        }
-    });
+                $("#designer").boldReportDesigner(
+                    {
+                        serviceUrl: "https://" + reportServerUrl + "/reporting/reportservice/api/Designer",
+                        reportServerUrl: "https://" + reportServerUrl + "/reporting/api/site/site1",
+                        serviceAuthorizationToken: token.token_type + " " + token.access_token,
+                        ajaxBeforeLoad: "onAjaxRequest"
+                    });
+            },
+            error: function () {
+                renderMessage();
+            }
+        });
+    } else {
+        renderMessage();
+    }
 });
 
 function renderMessage() {
-    let demo = document.getElementsByTagName("ej-sample")[0];
-    let container = document.createElement('div');
-    container.style.height = '100%';
-    container.style.display = 'flex';
-    container.style.alignItems = 'center';
-    container.style.justifyContent = 'center';
-
-    let textNode = document.createElement('span');
-    textNode.textContent = 'To run this sample, configure your on-premises server URL and valid user credentials.';
-    container.append(textNode);
-    demo.append(container);
+    let designerTag = document.getElementById('designer');
+    let container = document.getElementById('sample_error_msg');
+    if (designerTag) designerTag.style.display = 'none';
+    if (container) {
+        container.style.display = 'flex';
+        let textNode = document.createElement('span');
+        textNode.textContent = 'This sample uses placeholder credentials. To run it, configure your on-premises server URL, service URL and valid user credentials.';
+        container.append(textNode);
+    }
 }
 
 function onAjaxRequest(args) {
     args.headers.push({
-        Key: 'serverurl', Value: 'https://{your-report-server-domain}/reporting/api/site/site1'
+        Key: 'serverurl', Value: 'https://' + reportServerUrl + '/reporting/api/site/site1'
     });
 }
