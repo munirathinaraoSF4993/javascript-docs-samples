@@ -53,7 +53,8 @@ function renderMessage() {
     if (container) {
         container.style.display = 'flex';
         let textNode = document.createElement('span');
-        textNode.textContent = 'This sample uses placeholder credentials. To run it, configure your on-premises server URL, service URL and valid user credentials.';
+        textNode.style.width = '60%';
+        textNode.textContent = 'This sample uses placeholder credentials. To run it, configure your on-premises server URL, service URL, and valid username, password to obtain the service authorization token.';
         container.append(textNode);
     }
 }
