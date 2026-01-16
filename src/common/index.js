@@ -120,6 +120,10 @@ function renderErrorMsg(demo) {
     errorMsg.style.height = '100%';
     errorMsg.style.alignItems = 'center';
     errorMsg.style.justifyContent = 'center';
+
+    let textNode = document.createElement('span');
+    textNode.style.width = '60%';
+    errorMsg.append(textNode);
     demo.append(errorMsg);
 }
 
