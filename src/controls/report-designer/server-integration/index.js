@@ -16,7 +16,6 @@ function windowUnload(args) {
 $(function () {
     $(document.body).bind('submit', $.proxy(formSubmit, this));
     $(window).bind('beforeunload', $.proxy(windowUnload, this));
-    var dataValue = "";
     var apiRequest = new Object({ password: "", userid: "" });
 
     if (domainURL !== '' && domainURL.length > 0) {
