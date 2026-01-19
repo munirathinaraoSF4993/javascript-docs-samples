@@ -30,7 +30,7 @@ import {
 let header,sidebar;
 let reportViewer = 'report-viewer';
 let reportDesigner = 'report-designer';
-let loadedScriptSrcs = new Set();
+let loadedScripts = new Set();
 
 
 document.addEventListener('DOMContentLoaded', onDOMContentLoaded, false);
@@ -83,48 +83,40 @@ export async function updataSample(sampleData, isReportViewer) {
         fetchFile(`src/controls/${dirName}/${sampleData.routerPath}/index.js`)
     ]);
     demo.replaceChildren();
+    await appendDOM(demo, html);
+    eval(js);
+}
+
+async function appendDOM(target, html) {
     let doc = document.implementation.createHTMLDocument('');
     let wrapper = doc.createElement('div');
     wrapper.innerHTML = html;
     let nodes = Array.from(wrapper.childNodes);
     nodes.forEach(node => {
         if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SCRIPT') return;
-        demo.appendChild(document.importNode(node, true));
+        target.appendChild(document.importNode(node, true));
     });
+    await appendScripts(target, wrapper);
+}
+
+async function appendScripts(target, wrapper) {
     let scripts = wrapper.querySelectorAll('script');
     for (let oldScript of scripts) {
         let newScript = document.createElement('script');
         for (let attr of oldScript.attributes) newScript.setAttribute(attr.name, attr.value);
-
-        if (oldScript.src && !loadedScriptSrcs.has(oldScript.src)) {
-            loadedScriptSrcs.add(oldScript.src);
+        if (oldScript.src && !loadedScripts.has(oldScript.src)) {
+            loadedScripts.add(oldScript.src);
             await new Promise((resolve, reject) => {
                 newScript.addEventListener('load', resolve, { once: true });
                 newScript.addEventListener('error', reject, { once: true });
-                demo.appendChild(newScript);
+                target.appendChild(newScript);
             });
         } else {
             if (!newScript.hasAttribute('type')) newScript.type = 'text/javascript';
             newScript.text = oldScript.textContent || '';
-            demo.appendChild(newScript);
+            target.appendChild(newScript);
         }
     }
-    renderErrorMsg(demo);
-    eval(js);
-}
-
-function renderErrorMsg(demo) {
-    let errorMsg = document.createElement('div');
-    errorMsg.style.display = 'none';
-    errorMsg.id = 'sample_error_msg';
-    errorMsg.style.height = '100%';
-    errorMsg.style.alignItems = 'center';
-    errorMsg.style.justifyContent = 'center';
-
-    let textNode = document.createElement('span');
-    textNode.style.width = '60%';
-    errorMsg.append(textNode);
-    demo.append(errorMsg);
 }
 
 function onResize() {

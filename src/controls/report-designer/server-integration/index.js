@@ -1,5 +1,5 @@
 var isSubmit = true;
-var domainURL = '';
+var domainName = '';
 
 function formSubmit(args) {
     isSubmit = false;
@@ -18,45 +18,38 @@ $(function () {
     $(window).bind('beforeunload', $.proxy(windowUnload, this));
     var apiRequest = new Object({ password: "", userid: "" });
 
-    if (domainURL !== '' && domainURL.length > 0) {
+    if (domainName) {
         $.ajax({
             type: "POST",
-            url: "https://" + domainURL + "/reporting/api/site/site1/get-user-key",
+            url: "https://" + domainName + "/reporting/api/site/site1/get-user-key",
             data: apiRequest,
             success: function (data) {
                 var token = data && data.Token ? JSON.parse(data.Token) : null;
-                if (!token || !token.token_type || !token.access_token) return renderMessage();
+                if (!token || !token.token_type || !token.access_token) return showInfoMessage();
 
                 $("#designer").boldReportDesigner(
                     {
-                        serviceUrl: "https://" + domainURL + "/reporting/reportservice/api/Designer",
-                        reportServerUrl: "https://" + domainURL + "/reporting/api/site/site1",
-                        serviceAuthorizationToken: token.token_type + " " + token.access_token,
-                        ajaxBeforeLoad: "onAjaxRequest"
+                        serviceUrl: "https://" + domainName + "/reporting/reportservice/api/Designer",
+                        reportServerUrl: "https://" + domainName + "/reporting/api/site/site1",
+                        serviceAuthorizationToken: token.token_type + " " + token.access_token
                     });
             },
             error: function () {
-                renderMessage();
+                showInfoMessage();
             }
         });
     } else {
-        renderMessage();
+        showInfoMessage();
     }
 });
 
-function renderMessage() {
+function showInfoMessage() {
     let designerTag = document.getElementById('designer');
-    let container = document.getElementById('sample_error_msg');
+    let container = document.getElementById('server_info_msg');
     let textNode = container.querySelector('span');
     if (designerTag) designerTag.style.display = 'none';
     if (container && textNode) {
         container.style.display = 'flex';
-        textNode.textContent = 'This sample uses placeholder credentials. To run it, configure your on-premises server URL, service URL, and valid username, password to obtain the service authorization token.';
+        textNode.innerHTML = 'This sample uses placeholder credentials. To run it, configure your </br><b>on-premises domain</b> using the global variable <b>"domainName"</b> for concatenation</br> and provide <b>valid credentials (username and password)</b> to obtain the service authorization token.';
     }
-}
-
-function onAjaxRequest(args) {
-    args.headers.push({
-        Key: 'serverurl', Value: 'https://' + domainURL + '/reporting/api/site/site1'
-    });
 }
