@@ -5,8 +5,8 @@ function onDrillThrough(args) {
 
 $(function () {
     $("#viewer").boldReportViewer({
-                    reportServiceUrl: "https://demos.boldreports.com/services/api/ReportViewer",
-                    reportPath: '~/Resources/docs/sales-person-details.rdl',
+                    reportServiceUrl: "https://demos.boldreports.com/ReportService/api/Viewer",
+                    reportPath: '~/Resources/docs/sales-by-product.rdl',
                     drillThrough: onDrillThrough
                 });
 });
